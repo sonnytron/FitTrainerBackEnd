@@ -1,9 +1,8 @@
-from django.conf.urls import url, include
-from rest_framework.urlpatterns import format_suffix_patterns
+from rest_framework import routers
+
 from .views import CreateView
 
-urlpatterns = {
-    url(r'^exercises/$', CreateView.as_view(), name="Create"),
-}
+router = routers.DefaultRouter(trailing_slash=False)
+router.register('excercise', CreateView)
 
-urlpatterns = format_suffix_patterns(urlpatterns)
+urlpatterns = router.urls

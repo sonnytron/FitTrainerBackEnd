@@ -12,8 +12,16 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 
+import dj_database_url
+import envdir
+
+CONFIG_DIR = os.path.expanduser('~/.config/FitTrainer')
+
+if os.path.exists(CONFIG_DIR):
+    envdir.open(CONFIG_DIR)
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 
 # Quick-start development settings - unsuitable for production
@@ -23,9 +31,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'df-^+93!18v=8+4^#p31=(l0^6+%se#8hgmug_8_qze!35pvwi'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.path.exists(os.path.join(CONFIG_DIR, 'DEBUG'))
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '*').split(', ')
 
 
 # Application definition
@@ -38,7 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'api',
+    'FitTrainer.api',
 ]
 
 MIDDLEWARE = [
@@ -75,12 +83,10 @@ WSGI_APPLICATION = 'FitTrainer.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
+DATABASES = {'default': dj_database_url.config(
+    env='DJANGO_DATABASE_URL',
+    default='sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')
+)}
 
 
 # Password validation
@@ -120,3 +126,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.environ.get('STATIC_ROOT')
+
+# Enable Sentry
+if 'SENTRY_DSN' in os.environ:
+    # Set your DSN value
+    RAVEN_CONFIG = {'dsn': os.environ.get('SENTRY_DSN')}
+    INSTALLED_APPS += ('raven.contrib.django.raven_compat',)

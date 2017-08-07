@@ -1,0 +1,6 @@
+.coverage
+*.egg-info
+*.pyc
+db.sqlite3
+dist
+venv
